@@ -2,75 +2,73 @@ module iRobot(Clock, Reset, FunctionSelect, En, Confirm, Duration, setTime, Dirt
 
     // Main Inputs
     input Clock;
-	 input Reset; 						// Resets counter & FSM
-	 input En; 							// Power on signal 
-	 input Confirm; 					// To load customized duration to counter
-    input [1:0] FunctionSelect;	// User select function; Vacuum = 0, Sanitize = 1, Mop = 2, ComboMode = 3
+    input Reset; 				// Resets counter & FSM
+    input En; 					// Power on signal 
+    input Confirm; 				// To load customized duration to counter
+    input [1:0] FunctionSelect;			// User select function; Vacuum = 0, Sanitize = 1, Mop = 2, ComboMode = 3
     input [5:0] Duration;			// Custom set duration, assume each bit = 1 min
     input [10:0] setTime;			// Custom set starting time
 
-	 // Main outputs
+    // Main outputs
     output LED, Vacuum, Mop, Sanitize, Brake;
 	 
     // Internal Inputs
     input wire DirtySpot;															// Signal from dirty spot detector and battery status
-	 input wire Battery;																// Signal indicating battery status
+    input wire Battery;																// Signal indicating battery status
     wire [0:3] FunctionOutput; 													// Output from 2-to-4 decoder to run selected cleaning function
     wire [10:0] realTime; 															// Real-time seconds
     wire goTime; 																		// Signal indicating real-time match
-	 wire [5:0] CountDuration; 													// To store main cleaning count
-	 wire RunSpot; 																	// Signal to FSM to perform dirty spot cleaning
+    wire [5:0] CountDuration; 													// To store main cleaning count
+    wire RunSpot; 																	// Signal to FSM to perform dirty spot cleaning
     wire RunDurationVSM, RunDurationV, RunDurationS, RunDurationM; 	// Signal to FSM to run selected cleaning function
 
-	 // Main code starts here
-	 
-			 // Instantiate 2-to-4 Decoder for FunctionSelect
-			 Decoder2to4 decoder(FunctionSelect, En, FunctionOutput);
+	// Instantiate 2-to-4 Decoder for FunctionSelect
+	Decoder2to4 decoder(FunctionSelect, En, FunctionOutput);
 
-			 // Instantiate Real-time Checker to start main counter when set time is met
-			 RealTimeChecker checktime(Clock, En, Reset, setTime, realTime, goTime);
+	// Instantiate Real-time Checker to start main counter when set time is met
+	RealTimeChecker checktime(Clock, En, Reset, setTime, realTime, goTime);
 
-			 // Instantiate main cleaning counter to run cleaning function for set duration
-			 CleaningCounter counter(Clock, Reset, Battery, goTime, Confirm, Duration, CountDuration);
+	// Instantiate main cleaning counter to run cleaning function for set duration
+	CleaningCounter counter(Clock, Reset, Battery, goTime, Confirm, Duration, CountDuration);
 			 
-			 // Run spot cleaning for a fixed duration when dirty spot detected
-			 DirtySpotModule dirtyspot(Clock, DirtySpot, RunSpot);
+	// Run spot cleaning for a fixed duration when dirty spot detected
+	DirtySpotModule dirtyspot(Clock, DirtySpot, RunSpot);
 
-			 // Outputs assignment to FSM to run selected cleaning function
-			 assign RunDurationV = (FunctionOutput == 4'b1000 && goTime && |CountDuration); 		// Signal to Run Vacuum
-			 assign RunDurationS = (FunctionOutput == 4'b0100 && goTime && |CountDuration); 		// Signal to run sanitize
-			 assign RunDurationM = (FunctionOutput == 4'b0010 && goTime && |CountDuration); 		// Signal to Run Mop
-			 assign RunDurationVSM = (FunctionOutput == 4'b0001 && goTime && |CountDuration);	// Signal to Run ComboMode
+	// Outputs assignment to FSM to run selected cleaning function
+	assign RunDurationV = (FunctionOutput == 4'b1000 && goTime && |CountDuration); 	 // Signal to Run Vacuum
+	assign RunDurationS = (FunctionOutput == 4'b0100 && goTime && |CountDuration); 	 // Signal to run sanitize
+	assign RunDurationM = (FunctionOutput == 4'b0010 && goTime && |CountDuration); 	 // Signal to Run Mop
+	assign RunDurationVSM = (FunctionOutput == 4'b0001 && goTime && |CountDuration); // Signal to Run ComboMode
 
-			 // FSM for controlling the cleaning functions, battery interrupt, and spot cleaning
-			 FSMclean FSM(Clock, Reset, RunDurationV, RunDurationS, RunDurationM, RunDurationVSM, RunSpot, Battery, LED, Vacuum, Mop, Sanitize, Brake);
+	// FSM for controlling the cleaning functions, battery interrupt, and spot cleaning
+	FSMclean FSM(Clock, Reset, RunDurationV, RunDurationS, RunDurationM, RunDurationVSM, RunSpot, Battery, LED, Vacuum, Mop, Sanitize, Brake);
 
 endmodule
 
 
 module RealTimeChecker(Clock, En, Reset, setTime, realTime, goTime);
-    input Clock;         				// Clock input
-    input En;      						// Enable/power on signal
-	 input Reset;							// To reset goTime signal
-    input [10:0] setTime; 				// Set time in mins
-    output reg [10:0] realTime = 0; // Register to emulate real-time mins
-	 output reg goTime = 0; 			// Signal to main counter when set time is met
+    input Clock;         		// Clock input
+    input En;      			// Enable/power on signal
+    input Reset;			// To reset goTime signal
+    input [10:0] setTime; 		// Set time in mins
+    output reg [10:0] realTime = 0; 	// Register to emulate real-time mins
+    output reg goTime = 0; 		// Signal to main counter when set time is met
 
 	 always @(posedge Clock)
 		 if (En)
 			 begin
-					realTime <= realTime + 1; // Emulates real time counting when iRobot is powered on
+				realTime <= realTime + 1; // Emulates real time counting when iRobot is powered on
 
-				  // Check if the set time matches the real time
-					if (setTime == realTime)
-						goTime <= 1; // Set goTime high when set time matches real time
-						
-					// Check if realTime reaches the count value of 10110100000 (1440 min), then reset back to 0
-					if (realTime == 11'b10110100000)
-                realTime <= 0;
-					 
-					 if (Reset)
-						goTime <= 0;
+			  	// Check if the set time matches the real time
+				if (setTime == realTime)
+					goTime <= 1; // Set goTime high when set time matches real time
+					
+				// Check if realTime reaches the count value of 10110100000 (1440 min), then reset back to 0
+				if (realTime == 11'b10110100000)
+					realTime <= 0;
+				 
+				 if (Reset)
+					goTime <= 0;
 			 end
 			 
 endmodule
