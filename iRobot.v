@@ -13,13 +13,13 @@ module iRobot(Clock, Reset, FunctionSelect, En, Confirm, Duration, setTime, Dirt
     output LED, Vacuum, Mop, Sanitize, Brake;
 	 
     // Internal Inputs
-    input wire DirtySpot;															// Signal from dirty spot detector and battery status
-    input wire Battery;																// Signal indicating battery status
-    wire [0:3] FunctionOutput; 													// Output from 2-to-4 decoder to run selected cleaning function
-    wire [10:0] realTime; 															// Real-time seconds
-    wire goTime; 																		// Signal indicating real-time match
-    wire [5:0] CountDuration; 													// To store main cleaning count
-    wire RunSpot; 																	// Signal to FSM to perform dirty spot cleaning
+    input wire DirtySpot;						// Signal from dirty spot detector and battery status
+    input wire Battery;							// Signal indicating battery status
+    wire [0:3] FunctionOutput; 						// Output from 2-to-4 decoder to run selected cleaning function
+    wire [10:0] realTime; 						// Real-time seconds
+    wire goTime; 							// Signal indicating real-time match
+    wire [5:0] CountDuration; 						// To store main cleaning count
+    wire RunSpot; 							// Signal to FSM to perform dirty spot cleaning
     wire RunDurationVSM, RunDurationV, RunDurationS, RunDurationM; 	// Signal to FSM to run selected cleaning function
 
 	// Instantiate 2-to-4 Decoder for FunctionSelect
@@ -178,7 +178,7 @@ module FSMclean(Clock, Reset, RunVacuum, RunSanitize, RunMop, RunCombo, RunSpot,
                 Mop = 0;
                 Sanitize = 0;
 					 
-					 // Activate brake to stay on spot longer for cleaning if dirty spot is detected
+		// Activate brake to stay on spot longer for cleaning if dirty spot is detected
                 if (RunSpot) Brake = 1;
                 else Brake = 0;
 
@@ -193,7 +193,7 @@ module FSMclean(Clock, Reset, RunVacuum, RunSanitize, RunMop, RunCombo, RunSpot,
                 Mop = 0;
                 Sanitize = 1;
 
-					 // Activate brake to stay on spot longer for cleaning if dirty spot is detected
+		// Activate brake to stay on spot longer for cleaning if dirty spot is detected
                 if (RunSpot) Brake = 1;
                 else Brake = 0;
 
@@ -208,7 +208,7 @@ module FSMclean(Clock, Reset, RunVacuum, RunSanitize, RunMop, RunCombo, RunSpot,
                 Mop = 1;
                 Sanitize = 0;
 
-					 // Activate brake to stay on spot longer for cleaning if dirty spot is detected
+		// Activate brake to stay on spot longer for cleaning if dirty spot is detected
                 if (RunSpot) Brake = 1;
                 else Brake = 0;
 
@@ -223,7 +223,7 @@ module FSMclean(Clock, Reset, RunVacuum, RunSanitize, RunMop, RunCombo, RunSpot,
                 Mop = 1;
                 Sanitize = 1;
 
-					 // Activate brake to stay on spot longer for cleaning if dirty spot is detected
+		// Activate brake to stay on spot longer for cleaning if dirty spot is detected
                 if (RunSpot) Brake = 1;
                 else Brake = 0;
 
