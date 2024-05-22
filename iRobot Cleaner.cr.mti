@@ -1,0 +1,13 @@
+{C:/Quartus/iRobot Cleaner/iRobot.v} {1 {vlog -work work {C:/Quartus/iRobot Cleaner/iRobot.v}
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module iRobot
+-- Compiling module RealTimeChecker
+-- Compiling module CleaningCounter
+-- Compiling module DirtySpotModule
+-- Compiling module Decoder2to4
+-- Compiling module FSMclean
+
+Top level modules:
+	iRobot
+
+} {} {}}
